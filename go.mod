@@ -1,3 +1,3 @@
 module DSCs2md
 
-go 1.2.3
+go 1.23
