@@ -82,7 +82,7 @@ jobs:
         run: ls -la artifacts
 
       - name: Create GitHub Release and upload assets
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.14.0
         with:
           # Use a PAT stored in repository secret RELEASE_TOKEN (create one as described above).
           # If you prefer GITHUB_TOKEN and your org/repo allows it, you can set token: ${{ secrets.GITHUB_TOKEN }}
