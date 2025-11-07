@@ -89,4 +89,4 @@ jobs:
           token: ${{ secrets.DEEPSEEK2MD_RELEASE }}
           tag: release-${{ github.run_id }}
           name: Release ${{ github.sha }}
-          files: artifacts/*
+          artifacts: "artifacts/*"
