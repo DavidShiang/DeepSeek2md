@@ -2,6 +2,9 @@
 # It compiles two targets in a matrix and then creates a GitHub Release (only on push).
 name: Go - build & release
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "main" ]
