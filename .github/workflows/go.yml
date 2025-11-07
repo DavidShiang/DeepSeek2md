@@ -86,7 +86,7 @@ jobs:
         with:
           # Use a PAT stored in repository secret RELEASE_TOKEN (create one as described above).
           # If you prefer GITHUB_TOKEN and your org/repo allows it, you can set token: ${{ secrets.GITHUB_TOKEN }}
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.DEEPSEEK2MD_RELEASE }}
           tag: release-${{ github.run_id }}
           name: Release ${{ github.sha }}
           files: artifacts/*
