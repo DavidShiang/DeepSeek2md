@@ -1,5 +1,8 @@
 # This workflow builds and publishes executables for Windows-x64 and Linux-arm64.
 # It compiles two targets in a matrix and then creates a GitHub Release (only on push).
+# NOTE: To create Releases reliably when GITHUB_TOKEN is restricted, create a
+# Personal Access Token (PAT) with repo/public_repo scope and save it as
+# repository secret RELEASE_TOKEN, then this workflow will use that token.
 name: Go - build & release
 
 permissions:
@@ -59,6 +62,9 @@ jobs:
     runs-on: ubuntu-latest
     # Only create a GitHub Release on push to main (avoid creating releases for PR checks)
     if: github.event_name == 'push'
+    # ensure the release job has write permission to contents (explicit)
+    permissions:
+      contents: write
     steps:
       - name: Download windows artifact
         uses: actions/download-artifact@v4
@@ -78,6 +84,9 @@ jobs:
       - name: Create GitHub Release and upload assets
         uses: ncipollo/release-action@v1
         with:
+          # Use a PAT stored in repository secret RELEASE_TOKEN (create one as described above).
+          # If you prefer GITHUB_TOKEN and your org/repo allows it, you can set token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
           tag: release-${{ github.run_id }}
           name: Release ${{ github.sha }}
           files: artifacts/*
