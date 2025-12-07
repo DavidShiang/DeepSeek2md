@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/sqweek/dialog"
 )
 
 // 定义JSON结构体
@@ -43,6 +45,9 @@ func main() {
 	Filename := "conversations.json"
 	if len(os.Args) > 1 {
 		Filename = os.Args[1]
+	}else{
+		file, _ = OpenDialog()
+		if file!="" {Filename=file}
 	}
 	fmt.Printf("处理DeepSeek导出文件: %s\n", Filename)
 	jsonData, err := os.ReadFile(Filename)
@@ -307,4 +312,14 @@ func sanitizeFilename(filename string) string {
 		result = result[:100]
 	}
 	return strings.TrimSpace(result)
+}
+
+func OpenDialog() (string, error) {
+	// 选择文件
+	filePath, err := dialog.File().Filter("JSON files", "json").Title("请选择deepseek导出的JSON文件").Load()
+	if err != nil {
+		//fmt.Printf("选择文件失败: %v\n", err)
+		return "", err
+	}
+	return filePath, nil
 }
