@@ -46,7 +46,7 @@ func main() {
 	if len(os.Args) > 1 {
 		Filename = os.Args[1]
 	}else{
-		file, _ = OpenDialog()
+		file, _ := OpenDialog()
 		if file!="" {Filename=file}
 	}
 	fmt.Printf("处理DeepSeek导出文件: %s\n", Filename)
@@ -323,3 +323,4 @@ func OpenDialog() (string, error) {
 	}
 	return filePath, nil
 }
+
