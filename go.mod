@@ -1,6 +1,6 @@
 module DSCs2md
 
-go 1.25.3
+go 1.23
 
 require github.com/sqweek/dialog v0.0.0-20240226140203-065105509627
 
