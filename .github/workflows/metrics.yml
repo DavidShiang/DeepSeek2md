@@ -36,11 +36,18 @@ jobs:
           V_COUNT=$(jq -r '.count // 0' views.json)
           C_COUNT=$(jq -r '.count // 0' clones.json)
           
+          # 2. 如果文件不存在，初始化表头
           if [ ! -f traffic_history.csv ]; then
             echo "Date,Views,Clones" > traffic_history.csv
           fi
+
+          # 3. 将新数据存入临时文件
           echo "$DATE,$V_COUNT,$C_COUNT" >> traffic_history.csv
-          sort -u -t, -k1,1 traffic_history.csv -o traffic_history.csv
+
+          # 4. 【核心修复】：保留第一行表头，对剩余行进行排序去重
+          head -n 1 traffic_history.csv > temp.csv
+          tail -n +2 traffic_history.csv | sort -u -t, -k1,1 >> temp.csv
+          mv temp.csv traffic_history.csv
 
       - name: Generate Chart
         shell: python
@@ -55,29 +62,33 @@ jobs:
           img_path = os.path.join(cwd, 'traffic_chart.png')
 
           try:
-              df = pd.read_csv(csv_path)
+              # 读取时强制指定列名或检查
+              df = pd.read_csv('traffic_history.csv')
+
+              # 打印一下列名，方便在 Logs 里排错
+              print(f"Columns found: {df.columns.tolist()}")
+              
+              if 'Date' not in df.columns:
+                  # 如果因为某种原因还是没找到 Date，尝试手动修复索引
+                  df.columns = ['Date', 'Views', 'Clones']
+
               df['Date'] = pd.to_datetime(df['Date'])
               df = df.sort_values('Date')
 
-              # 设置中文字体（可选，GitHub 默认环境建议用英文）
               plt.figure(figsize=(10, 5))
               plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff')
               plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745')
               
               plt.title('DeepSeek2md Traffic Stats', fontsize=14)
-              plt.xlabel('Date')
-              plt.ylabel('Count')
               plt.grid(True, alpha=0.3)
               plt.legend()
               plt.xticks(rotation=45)
               plt.tight_layout()
               
-              # 强制保存到绝对路径
-              plt.savefig(img_path)
-              print(f"Chart successfully saved at {img_path}")
+              plt.savefig('traffic_chart.png')
           except Exception as e:
-              print(f"Error: {e}")
-              raise # 抛出错误让 Action 停止，这样你就能看到报错信息了
+              print(f"Detailed Error: {e}")
+              raise
 
       - name: Commit and Push
         run: |
