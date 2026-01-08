@@ -23,6 +23,4 @@ DeepSeek导出的对话记录（json）文件转换为MarkDown文件，便于利
 2. 选择部分日期、主题导出，而不是全部导出。
 ---
 
-# 说明
-
-代码主要由deepseek编写，它竟然不知道自己的导出文件内容格式，晕。
+![GitHub Traffic](github-metrics-traffic.svg)
