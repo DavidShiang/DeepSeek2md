@@ -1,30 +1,37 @@
-name: GitHub Metrics
+name: "Persistent Traffic Backup"
 
-permissions:
-  contents: write
-  
 on:
   schedule:
-    - cron: "0 0 * * *" # 每天运行
-  workflow_dispatch:
+    - cron: '0 0 * * *' # 每天北京时间上午 8:00 运行
+  workflow_dispatch:   # 支持手动触发，建议配置完先点一次
+
 jobs:
-  github-metrics:
+  backup-traffic:
     runs-on: ubuntu-latest
+    # 必须明确赋予写权限，否则 commit 会失败
     permissions:
       contents: write
+
     steps:
-      - uses: lowlighter/metrics@latest
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch and Merge Traffic Data
+        uses: teunmooij/traffic-lite@v1
         with:
-          # 使用你之前设置的 Secret 名
+          # 使用你配置好的个人访问令牌 (PAT)
           token: ${{ secrets.DEEPSEEK2MD_STATS }}
-          
-          # 配置输出
-          filename: github-metrics-traffic.svg
-          base: "" # 禁用默认的基础信息，只显示流量
-          
-          # 核心配置：开启流量统计插件
-          plugin_traffic: yes
-          
-          # 存储到当前分支的指定位置
-          output_action: commit
-          committer_branch: main # 或者改为你的主分支名，如 master
+          # 自动获取当前仓库名
+          repo: ${{ github.repository }}
+          # 指定数据存放路径，建议放在单独的文件夹中
+          path: 'traffic-history/data.json'
+
+      - name: Commit and Push Changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          # 提交时的说明文字
+          message: "chron: update traffic statistics [skip ci]"
+          # 指定要提交的文件
+          add: 'traffic-history/data.json'
+          # 使用 GitHub 官方机器人作为作者
+          default_author: github_actions
