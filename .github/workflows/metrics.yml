@@ -2,7 +2,7 @@ name: "Repository Traffic Analytics"
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *' 
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -18,68 +17,60 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: pip install pandas matplotlib
 
-      - name: Fetch Data and Update History
+      - name: Fetch and Update Data
         env:
           GH_TOKEN: ${{ secrets.DEEPSEEK2MD_STATS }}
-          REPO_NAME: ${{ github.repository }}
         run: |
+          # 1. 获取数据 (使用当前环境路径)
+          REPO="DavidShiang/DeepSeek2md"
           DATE=$(date +%Y-%m-%d)
+          
+          VIEWS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/views" | jq -r '.count // 0')
+          CLONES=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/clones" | jq -r '.count // 0')
+          
+          # 2. 写入或追加 CSV
           if [ ! -f traffic_history.csv ]; then
             echo "Date,Views,Clones" > traffic_history.csv
           fi
+          echo "$DATE,$VIEWS,$CLONES" >> traffic_history.csv
           
-          # 获取 Views
-          VIEWS_DATA=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/traffic/views")
-          VIEWS_COUNT=$(echo $VIEWS_DATA | jq -r '.count // 0')
-
-          # 获取 Clones
-          CLONES_DATA=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/traffic/clones")
-          CLONES_COUNT=$(echo $CLONES_DATA | jq -r '.count // 0')
-          
-          echo "$DATE,$VIEWS_COUNT,$CLONES_COUNT" >> traffic_history.csv
+          # 3. 去重排序
           sort -u -t, -k1,1 traffic_history.csv -o traffic_history.csv
 
-      - name: Generate Traffic Chart
-        # 使用冒号和管道符号 '|' 来告诉 YAML 后面是一整段多行字符串
+      - name: Generate Chart
+        shell: python # 直接指定 shell 为 python，避免 YAML 解析字符串的痛苦
         run: |
-          python - <<EOF
           import pandas as pd
           import matplotlib.pyplot as plt
-          import os
+          
+          try:
+              df = pd.read_csv('traffic_history.csv')
+              df['Date'] = pd.to_datetime(df['Date'])
+              df = df.sort_values('Date')
 
-          if not os.path.exists('traffic_history.csv'):
-              print('File not found')
-              exit()
-
-          df = pd.read_csv('traffic_history.csv')
-          df['Date'] = pd.to_datetime(df['Date'])
-          df = df.sort_values('Date')
-
-          plt.figure(figsize=(10, 5))
-          plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff')
-          plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745')
-
-          plt.title('DeepSeek2md Traffic History')
-          plt.xlabel('Date')
-          plt.ylabel('Count')
-          plt.legend()
-          plt.grid(True, alpha=0.3)
-          plt.xticks(rotation=45)
-          plt.tight_layout()
-
-          plt.savefig('traffic_chart.png')
-          print('Chart generated successfully')
-          EOF
+              # 绘图逻辑
+              plt.figure(figsize=(10, 5))
+              plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff', linewidth=2)
+              plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745', linewidth=2)
+              
+              plt.title('DavidShiang/DeepSeek2md Traffic Trend', fontsize=14)
+              plt.grid(True, alpha=0.3)
+              plt.legend()
+              plt.tight_layout()
+              
+              plt.savefig('traffic_chart.png', dpi=100)
+          except Exception as e:
+              print(f"Error generating chart: {e}")
 
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add traffic_history.csv traffic_chart.png
-          git commit -m "docs: update traffic logs" || echo "No changes"
+          git commit -m "update traffic statistics [skip ci]" || exit 0
           git push
