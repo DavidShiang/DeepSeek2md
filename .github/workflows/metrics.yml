@@ -16,7 +16,7 @@ jobs:
       - uses: lowlighter/metrics@latest
         with:
           # 使用你之前设置的 Secret 名
-          token: ${{ secrets.DEEPSEEK2MD_RELEASE }}
+          token: ${{ secrets.DEEPSEEK2MD_STATS }}
           
           # 配置输出
           filename: github-metrics-traffic.svg
