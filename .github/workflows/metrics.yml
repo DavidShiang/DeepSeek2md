@@ -1,4 +1,8 @@
 name: GitHub Metrics
+
+permissions:
+  contents: write
+  
 on:
   schedule:
     - cron: "0 0 * * *" # 每天运行
