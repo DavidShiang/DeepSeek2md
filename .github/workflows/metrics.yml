@@ -1,14 +1,13 @@
-name: "Persistent Traffic Backup"
+name: "Repository Traffic Analytics"
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天北京时间上午 8:00 运行
-  workflow_dispatch:   # 支持手动触发，建议配置完先点一次
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
-  backup-traffic:
+  analyze-traffic:
     runs-on: ubuntu-latest
-    # 必须明确赋予写权限，否则 commit 会失败
     permissions:
       contents: write
 
@@ -16,22 +15,71 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch and Merge Traffic Data
-        uses: teunmooij/traffic-lite@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          # 使用你配置好的个人访问令牌 (PAT)
-          token: ${{ secrets.DEEPSEEK2MD_STATS }}
-          # 自动获取当前仓库名
-          repo: ${{ github.repository }}
-          # 指定数据存放路径，建议放在单独的文件夹中
-          path: 'traffic-history/data.json'
+          python-version: '3.x'
 
-      - name: Commit and Push Changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          # 提交时的说明文字
-          message: "chron: update traffic statistics [skip ci]"
-          # 指定要提交的文件
-          add: 'traffic-history/data.json'
-          # 使用 GitHub 官方机器人作为作者
-          default_author: github_actions
+      - name: Install dependencies
+        run: pip install pandas matplotlib
+
+      - name: Fetch Data and Update History
+        env:
+          GH_TOKEN: ${{ secrets.DEEPSEEK2MD_STATS }}
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          if [ ! -f traffic_history.csv ]; then
+            echo "Date,Views,Clones" > traffic_history.csv
+          fi
+          
+          # 获取 Views
+          VIEWS_DATA=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/traffic/views")
+          VIEWS_COUNT=$(echo $VIEWS_DATA | jq -r '.count // 0')
+
+          # 获取 Clones
+          CLONES_DATA=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO_NAME/traffic/clones")
+          CLONES_COUNT=$(echo $CLONES_DATA | jq -r '.count // 0')
+          
+          echo "$DATE,$VIEWS_COUNT,$CLONES_COUNT" >> traffic_history.csv
+          sort -u -t, -k1,1 traffic_history.csv -o traffic_history.csv
+
+      - name: Generate Traffic Chart
+        # 使用冒号和管道符号 '|' 来告诉 YAML 后面是一整段多行字符串
+        run: |
+          python - <<EOF
+          import pandas as pd
+          import matplotlib.pyplot as plt
+          import os
+
+          if not os.path.exists('traffic_history.csv'):
+              print('File not found')
+              exit()
+
+          df = pd.read_csv('traffic_history.csv')
+          df['Date'] = pd.to_datetime(df['Date'])
+          df = df.sort_values('Date')
+
+          plt.figure(figsize=(10, 5))
+          plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff')
+          plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745')
+
+          plt.title('DeepSeek2md Traffic History')
+          plt.xlabel('Date')
+          plt.ylabel('Count')
+          plt.legend()
+          plt.grid(True, alpha=0.3)
+          plt.xticks(rotation=45)
+          plt.tight_layout()
+
+          plt.savefig('traffic_chart.png')
+          print('Chart generated successfully')
+          EOF
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add traffic_history.csv traffic_chart.png
+          git commit -m "docs: update traffic logs" || echo "No changes"
+          git push
