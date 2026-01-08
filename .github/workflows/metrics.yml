@@ -1,26 +1,26 @@
-name: GitHub Repo Stats
-
+name: GitHub Metrics
 on:
   schedule:
-    # 每天北京时间早上 8:00 运行
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动运行
-
+    - cron: "0 0 * * *" # 每天运行
+  workflow_dispatch:
 jobs:
-  publish:
+  github-metrics:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: lowlighter/metrics@latest
         with:
-          fetch-depth: 0
-
-      - name: Generate Traffic Charts
-        uses: MishaKav/github-traffic-stats@v1.1.1
-        with:
-          # 使用你之前配置在 Secrets 里的 Token
+          # 使用你之前设置的 Secret 名
           token: ${{ secrets.DEEPSEEK2MD_RELEASE }}
-          # 统计当前仓库
-          repository: ${{ github.repository }}
-          # 自动创建一个名为 'github-traffic-stats' 的分支来存储数据和图片
-          base_branch: github-traffic-stats
+          
+          # 配置输出
+          filename: github-metrics-traffic.svg
+          base: "" # 禁用默认的基础信息，只显示流量
+          
+          # 核心配置：开启流量统计插件
+          plugin_traffic: yes
+          
+          # 存储到当前分支的指定位置
+          output_action: commit
+          committer_branch: main # 或者改为你的主分支名，如 master
