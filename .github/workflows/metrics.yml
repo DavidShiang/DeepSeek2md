@@ -26,51 +26,69 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.DEEPSEEK2MD_STATS }}
         run: |
-          # 1. 获取数据 (使用当前环境路径)
           REPO="DavidShiang/DeepSeek2md"
           DATE=$(date +%Y-%m-%d)
           
-          VIEWS=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/views" | jq -r '.count // 0')
-          CLONES=$(curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/clones" | jq -r '.count // 0')
+          # 获取数据并直接写入文件，避免复杂的变量传递
+          curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/views" > views.json
+          curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/clones" > clones.json
           
-          # 2. 写入或追加 CSV
+          V_COUNT=$(jq -r '.count // 0' views.json)
+          C_COUNT=$(jq -r '.count // 0' clones.json)
+          
           if [ ! -f traffic_history.csv ]; then
             echo "Date,Views,Clones" > traffic_history.csv
           fi
-          echo "$DATE,$VIEWS,$CLONES" >> traffic_history.csv
-          
-          # 3. 去重排序
+          echo "$DATE,$V_COUNT,$C_COUNT" >> traffic_history.csv
           sort -u -t, -k1,1 traffic_history.csv -o traffic_history.csv
 
       - name: Generate Chart
-        shell: python # 直接指定 shell 为 python，避免 YAML 解析字符串的痛苦
+        shell: python
         run: |
           import pandas as pd
           import matplotlib.pyplot as plt
-          
+          import os
+
+          # 获取当前工作目录
+          cwd = os.getcwd()
+          csv_path = os.path.join(cwd, 'traffic_history.csv')
+          img_path = os.path.join(cwd, 'traffic_chart.png')
+
           try:
-              df = pd.read_csv('traffic_history.csv')
+              df = pd.read_csv(csv_path)
               df['Date'] = pd.to_datetime(df['Date'])
               df = df.sort_values('Date')
 
-              # 绘图逻辑
+              # 设置中文字体（可选，GitHub 默认环境建议用英文）
               plt.figure(figsize=(10, 5))
-              plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff', linewidth=2)
-              plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745', linewidth=2)
+              plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff')
+              plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745')
               
-              plt.title('DavidShiang/DeepSeek2md Traffic Trend', fontsize=14)
+              plt.title('DeepSeek2md Traffic Stats', fontsize=14)
+              plt.xlabel('Date')
+              plt.ylabel('Count')
               plt.grid(True, alpha=0.3)
               plt.legend()
+              plt.xticks(rotation=45)
               plt.tight_layout()
               
-              plt.savefig('traffic_chart.png', dpi=100)
+              # 强制保存到绝对路径
+              plt.savefig(img_path)
+              print(f"Chart successfully saved at {img_path}")
           except Exception as e:
-              print(f"Error generating chart: {e}")
+              print(f"Error: {e}")
+              raise # 抛出错误让 Action 停止，这样你就能看到报错信息了
 
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add traffic_history.csv traffic_chart.png
-          git commit -m "update traffic statistics [skip ci]" || exit 0
-          git push
+          # 检查文件是否存在，防止提交报错
+          if [ -f traffic_chart.png ]; then
+            git add traffic_history.csv traffic_chart.png
+            git commit -m "update traffic logs [skip ci]" || echo "No changes"
+            git push
+          else
+            echo "Error: traffic_chart.png not found!"
+            exit 1
+          fi
