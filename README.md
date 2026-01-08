@@ -23,4 +23,6 @@ DeepSeek导出的对话记录（json）文件转换为MarkDown文件，便于利
 2. 选择部分日期、主题导出，而不是全部导出。
 ---
 
-![GitHub Traffic](github-metrics-traffic.svg)
+### 📈 项目流量统计
+![Traffic History](traffic_chart.png)
+> 数据每日自动更新。完整历史记录请查看 [traffic_history.csv](./traffic_history.csv)。
