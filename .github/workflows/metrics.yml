@@ -2,22 +2,25 @@ name: GitHub Repo Stats
 
 on:
   schedule:
-    # 每天 UTC 时间 0:00 运行一次 (北京时间早上 8:00)
+    # 每天北京时间早上 8:00 运行
     - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动点击运行
+  workflow_dispatch: # 允许手动运行
 
 jobs:
-  run-stats:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Generate stats
-        uses: jgehrcke/github-repository-stats@v1
         with:
-          # 使用我们刚才配置的 Secret
+          fetch-depth: 0
+
+      - name: Generate Traffic Charts
+        uses: MishaKav/github-traffic-stats@v1.1.1
+        with:
+          # 使用你之前配置在 Secrets 里的 Token
           token: ${{ secrets.DEEPSEEK2MD_RELEASE }}
-          # 告诉 Action 哪些数据需要持久化
-          # 默认会保存到分支 `gh-pages` 的 `charts` 目录下
-          datadir: charts
+          # 统计当前仓库
+          repository: ${{ github.repository }}
+          # 自动创建一个名为 'github-traffic-stats' 的分支来存储数据和图片
+          base_branch: github-traffic-stats
