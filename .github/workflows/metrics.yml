@@ -42,8 +42,8 @@ jobs:
           curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/views" > views.json
           curl -s -H "Authorization: token $GH_TOKEN" "https://api.github.com/repos/$REPO/traffic/clones" > clones.json
           
-          V_COUNT=$(jq -r '.count // 0' views.json)
-          C_COUNT=$(jq -r '.count // 0' clones.json)
+          V_COUNT=$(jq -r '.views[-1].count // 0' views.json)
+          C_COUNT=$(jq -r '.clones[-1].count // 0' clones.json)
           
           # 路径指向数据仓库
           CSV_FILE="data-repo/DeepSeek2md_traffic_history.csv"
