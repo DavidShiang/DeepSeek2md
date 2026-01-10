@@ -64,6 +64,7 @@ jobs:
         run: |
           import pandas as pd
           import matplotlib.pyplot as plt
+          import matplotlib.dates as mdates
           import os
 
           # 明确指向数据仓库中的文件
@@ -71,6 +72,7 @@ jobs:
           img_path = 'data-repo/DeepSeek2md_traffic_chart.png'
 
           try:
+              # 1. 加载数据
               df = pd.read_csv(csv_path)
               print(f"Columns found: {df.columns.tolist()}")
               
@@ -78,20 +80,37 @@ jobs:
                   df.columns = ['Date', 'Views', 'Clones']
 
               df['Date'] = pd.to_datetime(df['Date'])
-              df = df.sort_values('Date')
+              df = df.sort_values('Date').drop_duplicates('Date')
 
-              plt.figure(figsize=(10, 5))
-              plt.plot(df['Date'], df['Views'], marker='o', label='Views', color='#007bff')
-              plt.plot(df['Date'], df['Clones'], marker='s', label='Clones', color='#28a745')
+              # 2. 设置固定尺寸的画布 (1000x500 像素)
+              fig, ax = plt.subplots(figsize=(10, 5), dpi=100)
               
-              plt.title('DeepSeek2md Traffic Stats', fontsize=14)
-              plt.grid(True, alpha=0.3)
-              plt.legend()
-              plt.xticks(rotation=45)
+              # 3. 绘制折线
+              ax.plot(df['Date'], df['Views'], marker='.', markersize=4, 
+                      label='Views', color='#007bff', linewidth=1.5, alpha=0.8)
+              ax.plot(df['Date'], df['Clones'], marker='.', markersize=4, 
+                      label='Clones', color='#28a745', linewidth=1.5, alpha=0.8)
+
+              # 4. 【核心优化】动态调整 X 轴日期显示
+              # 根据时间跨度自动选择间隔，防止标签重叠
+              ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+              ax.xaxis.set_major_locator(mdates.AutoDateLocator())
+              
+              # 自动旋转日期标签
+              fig.autofmt_xdate()
+              
+              # 5. 图表修饰
+              plt.title(f'DeepSeek2md Traffic Trend ({df["Date"].min().strftime("%Y/%m/%d")} - {df["Date"].max().strftime("%Y/%m/%d")})', 
+                        fontsize=12, pad=15)
+              ax.grid(True, linestyle=':', alpha=0.5)
+              ax.set_facecolor('#f8f9fa') # 给图表一个浅色背景，更有质感
+              ax.legend(loc='upper left', frameon=True, shadow=True)
+
+              # 6. 保存并确保尺寸固定
               plt.tight_layout()
+              plt.savefig(img_path, bbox_inches='tight')
+              print(f"Chart generated from {df['Date'].min()} to {df['Date'].max()}")
               
-              plt.savefig(img_path)
-              print("Chart saved successfully.")
           except Exception as e:
               print(f"Detailed Error: {e}")
               raise
