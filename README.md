@@ -24,5 +24,5 @@ DeepSeek导出的对话记录（json）文件转换为MarkDown文件，便于利
 ---
 
 ### 📈 项目流量统计
-![Traffic History](traffic_chart.png)
-> 数据每日自动更新。完整历史记录请查看 [traffic_history.csv](./traffic_history.csv)。
+![Traffic History](https://raw.githubusercontent.com/DavidShiang/davidshiang-metrics-data/main/DeepSeek2md_traffic_chart.png)
+> 数据每日自动更新。完整历史记录请查看 [traffic_history.csv](https://raw.githubusercontent.com/DavidShiang/davidshiang-metrics-data/main/DeepSeek2md_traffic_history.csv)。
