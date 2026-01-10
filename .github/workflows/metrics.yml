@@ -102,8 +102,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          if [ -f traffic_chart.png ]; then
-            git add traffic_history.csv DeepSeek2md_traffic_chart.png
+          if [ -f DeepSeek2md_traffic_chart.png ]; then
+            git add DeepSeek2md_traffic_history.csv DeepSeek2md_traffic_chart.png
             git commit -m "update traffic logs from DeepSeek2md [skip ci]" || echo "No changes"
             git push
           else
