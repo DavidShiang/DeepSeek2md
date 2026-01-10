@@ -53,6 +53,7 @@ jobs:
           fi
 
           echo "$DATE,$V_COUNT,$C_COUNT" >> "$CSV_FILE"
+          echo "$DATE,$V_COUNT,$C_COUNT"
 
           # 保护表头并去重排序
           head -n 1 "$CSV_FILE" > temp.csv
