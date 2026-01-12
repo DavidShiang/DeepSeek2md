@@ -83,14 +83,18 @@ jobs:
               df['Date'] = pd.to_datetime(df['Date'])
               df = df.sort_values('Date').drop_duplicates('Date')
 
+              # 1a. 计算累计值 - 这正是您要的从开始到每日的累加
+              df['Cumulative_Views'] = df['Views'].cumsum()
+              df['Cumulative_Clones'] = df['Clones'].cumsum()
+
               # 2. 设置固定尺寸的画布 (1000x500 像素)
               fig, ax = plt.subplots(figsize=(10, 5), dpi=100)
               
               # 3. 绘制折线
-              ax.plot(df['Date'], df['Views'], marker='.', markersize=4, 
-                      label='Views', color='#007bff', linewidth=1.5, alpha=0.8)
-              ax.plot(df['Date'], df['Clones'], marker='.', markersize=4, 
-                      label='Clones', color='#28a745', linewidth=1.5, alpha=0.8)
+              ax.plot(df['Date'], df['Cumulative_Views'], marker='.', markersize=4, 
+                      label='TotalViews', color='#007bff', linewidth=1.5, alpha=0.8)
+              ax.plot(df['Date'], df['Cumulative_Clones'], marker='.', markersize=4, 
+                      label='TotalClones', color='#28a745', linewidth=1.5, alpha=0.8)
 
               # 4. 【核心优化】动态调整 X 轴日期显示
               # 根据时间跨度自动选择间隔，防止标签重叠
@@ -101,7 +105,7 @@ jobs:
               fig.autofmt_xdate()
               
               # 5. 图表修饰
-              plt.title(f'DeepSeek2md Traffic ({df["Date"].min().strftime("%Y/%m/%d")} - {df["Date"].max().strftime("%Y/%m/%d")})', 
+              plt.title(f'DeepSeek2md Total Traffic ({df["Date"].min().strftime("%Y/%m/%d")} - {df["Date"].max().strftime("%Y/%m/%d")})', 
                         fontsize=12, pad=15)
               ax.grid(True, linestyle=':', alpha=0.5)
               ax.set_facecolor('#f8f9fa') # 给图表一个浅色背景，更有质感
