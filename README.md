@@ -1,9 +1,9 @@
-# DeepSeek 历史对话导出器 (DeepSeek Exporter)
+# DeepSeek2md 历史对话导出markdown
 
 [![Go Version](https://img.shields.io/badge/go-1.25.3-blue.svg)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-一个基于终端界面 (TUI) 的 **DeepSeek 历史对话导出工具**，支持智能分页、按需加载、精准选择以及本地排重导出，完美解决 DeepSeek 历史记录备份及再利用的问题。
+这是一个基于终端界面 (TUI) 的 **DeepSeek 历史对话导出工具**，支持智能分页、按需加载、精准选择以及本地排重导出，完美解决 DeepSeek 历史记录备份及再利用的问题。
 
 导出的MarkDown文件，便于利用笔记软件，如obsidian，整理、管理。
 
