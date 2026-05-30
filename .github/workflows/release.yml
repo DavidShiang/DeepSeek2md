@@ -72,7 +72,7 @@ jobs:
           done
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: dist/* # 上传所有编译好的二进制文件
           generate_release_notes: true      # 🌟 自动根据两个 tag 之间的 commit 生成 Release Note
