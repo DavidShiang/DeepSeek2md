@@ -1,0 +1,80 @@
+name: Build and Release
+
+# 触发条件：当推送以 'v' 开头的 tag 时触发（例如 v1.0.0）
+on:
+  push:
+    tags:
+      - 'v*'
+
+# 赋予 GitHub Actions 创建 Release 和上传文件的权限
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build & Release
+    runs-on: ubuntu-latest # 统一在一个 Ubuntu 环境中完成所有平台的交叉编译
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整的 commit 历史，用于生成更新日志
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.3' # 请确保与你 go.mod 中的版本一致
+
+      - name: Extract Version
+        id: get_version
+        # 将 tag 名称 (如 v1.0.0) 提取并存入环境变量
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Cross Compile
+        run: |
+          mkdir -p dist
+          
+          # 定义需要编译的目标平台和架构 (OS/ARCH)
+          TARGETS=(
+            "linux/amd64"
+            "linux/arm64"
+            "windows/amd64"
+            "windows/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+          )
+          
+          # 获取当前的 UTC 时间作为编译时间
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          for target in "${TARGETS[@]}"; do
+            GOOS=${target%/*}
+            GOARCH=${target#*/}
+            
+            # 拼接基础文件名
+            BIN_NAME="deepseek-exporter-${{ env.VERSION }}-${GOOS}-${GOARCH}"
+            
+            # 如果是 Windows 平台，自动加上 .exe 后缀
+            if [ "$GOOS" = "windows" ]; then
+              BIN_NAME="${BIN_NAME}.exe"
+            fi
+            
+            echo "🚀 Building $BIN_NAME ..."
+            
+            # 核心：设置 GOOS 和 GOARCH 触发交叉编译
+            # -s -w 用于剔除调试信息，减小约 30% 的体积
+            # -X 用于动态注入代码中的版本号和编译时间
+            GOOS=$GOOS GOARCH=$GOARCH go build \
+              -ldflags="-s -w -X 'main.Version=${{ env.VERSION }}' -X 'main.BuildTime=${BUILD_TIME}'" \
+              -o "dist/$BIN_NAME" \
+              .
+          done
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/* # 上传所有编译好的二进制文件
+          generate_release_notes: true      # 🌟 自动根据两个 tag 之间的 commit 生成 Release Note
+          draft: false
+          prerelease: false

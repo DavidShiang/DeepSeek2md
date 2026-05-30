@@ -1,0 +1,116 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Windows AMD64",
+      "type": "shell",
+      "command": "go",
+      "args": [
+        "build",
+        "-v",
+        "-o",
+        "${workspaceFolder}/bin/${workspaceFolderBasename}_Win_amd64.exe",
+        
+      ],
+      "options": {
+        "env": {
+          "GOOS": "windows",
+          "GOARCH": "amd64"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": ["$go"],
+      "detail": "编译Windows AMD64可执行文件"
+    },
+     
+    {
+      "label": "Build Linux AMD64",
+      "type": "shell",
+      "command": "go",
+      "args": [
+        "build",
+        "-v",
+        "-o",
+        "${workspaceFolder}/bin/${workspaceFolderBasename}_Linux_amd64",
+        
+      ],
+      "options": {
+        "env": {
+          "GOOS": "linux",
+          "GOARCH": "amd64"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": ["$go"],
+      "detail": "编译Linux AMD64可执行文件"
+    },
+    {
+      "label": "Build Linux ARM64",
+      "type": "shell",
+      "command": "go",
+      "args": [
+        "build",
+        "-v",
+        "-o",
+        "${workspaceFolder}/bin/${workspaceFolderBasename}_Linux_arm64"
+      ],
+      "options": {
+        "env": {
+          "GOOS": "linux",
+          "GOARCH": "arm64"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": ["$go"],
+      "detail": "编译Linux ARM64可执行文件"
+    },
+    {
+      "label": "Build All Platforms",
+      "dependsOn": [
+        "Build Windows AMD64",
+        "Build Windows ARM64",
+        "Build Linux AMD64",
+        "Build Linux ARM64"
+      ],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "一键编译所有平台的可执行文件"
+    },
+    {
+      "label": "Clean Build Output",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "${workspaceFolder}/bin"
+      ],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "Remove-Item",
+          "-Recurse",
+          "-Force",
+          "${workspaceFolder}/bin",
+          "-ErrorAction",
+          "SilentlyContinue"
+        ]
+      },
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "清理编译输出目录"
+    }
+  ]
+}
