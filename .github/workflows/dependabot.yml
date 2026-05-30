@@ -1,6 +1,0 @@
-version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly" # 每周检查一次 Action 是否有新版本
