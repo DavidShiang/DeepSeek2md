@@ -53,7 +53,7 @@ jobs:
             GOARCH=${target#*/}
             
             # 拼接基础文件名
-            BIN_NAME="deepseek-exporter-${{ env.VERSION }}-${GOOS}-${GOARCH}"
+            BIN_NAME="DeepSeek2md-${{ env.VERSION }}-${GOOS}-${GOARCH}"
             
             # 如果是 Windows 平台，自动加上 .exe 后缀
             if [ "$GOOS" = "windows" ]; then
