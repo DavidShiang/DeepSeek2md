@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0 # 获取完整的 commit 历史，用于生成更新日志
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: '1.25.3' # 请确保与你 go.mod 中的版本一致
 
