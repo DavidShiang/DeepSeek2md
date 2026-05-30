@@ -50,16 +50,21 @@
 1. 获取你的 DeepSeek Web Token：
    * 在浏览器登录 [chat.deepseek.com](https://chat.deepseek.com)
    * 按 `F12` 打开开发者工具，切换到 **Network (网络)** 标签。
-     ![alt text](images/image0.png)
+   ![alt text](images/image0.png)
+   
    * 截图中圈出的userToken 后面的value内容即为 Token。
-     ![alt text](images/image.png)
+   ![alt text](images/image.png)
+
    * 部分导出、全部导出、手动选择
-     ![alt text](images/image-1.png)
+   ![alt text](images/image-1.png)
+
    * 可以分页手动选择，空格选择、回车完成选择
-     ![alt text](images/image-2.png)
+   ![alt text](images/image-2.png)
+
    * 回车后导出所选记录
-     ![alt text](images/image-3.png)
-     ![alt text](images/image-4.png)
+   ![alt text](images/image-3.png)
+   ![alt text](images/image-4.png)
+
    * 按键盘“Q”键退出
 
 ### 构建与运行
