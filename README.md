@@ -50,16 +50,16 @@
 1. 获取你的 DeepSeek Web Token：
    * 在浏览器登录 [chat.deepseek.com](https://chat.deepseek.com)
    * 按 `F12` 打开开发者工具，切换到 **Network (网络)** 标签。
-     ![image-20260530121911187](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530121911187.png)
+     ![alt text](images/image0.png)
    * 截图中圈出的userToken 后面的value内容即为 Token。
-     ![image-20260530122721752](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530122721752.png)
+     ![alt text](images/image.png)
    * 部分导出、全部导出、手动选择
-     ![image-20260530122816568](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530122816568.png)
+     ![alt text](images/image-1.png)
    * 可以分页手动选择，空格选择、回车完成选择
-     ![image-20260530123032494](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530123032494.png)
+     ![alt text](images/image-2.png)
    * 回车后导出所选记录
-     ![image-20260530123134226](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530123134226.png)
-     ![image-20260530124518399](C:\Users\大相\AppData\Roaming\Typora\typora-user-images\image-20260530124518399.png)
+     ![alt text](images/image-3.png)
+     ![alt text](images/image-4.png)
    * 按键盘“Q”键退出
 
 ### 构建与运行
