@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -16,6 +17,20 @@ import (
 var (
 	Version   = "dev"
 	BuildTime = "unknown"
+	GoVersion = runtime.Version()
+	Author    = "David.xcm@gmail.com"
+)
+
+// === 定义TUI常用颜色ANSI代码 ===
+const (
+	reset   = "\x1b[0m"
+	red     = "\x1b[31m"
+	green   = "\x1b[32m"
+	yellow  = "\x1b[33m"
+	blue    = "\x1b[34m"
+	magenta = "\x1b[35m"
+	cyan    = "\x1b[36m"
+	white   = "\x1b[37m"
 )
 
 // === TUI 状态与消息定义 ===
@@ -237,7 +252,7 @@ func (m appModel) View() string {
 		}
 
 	case stateList:
-		s.WriteString("📜 历史记录选择 (↑/↓ 移动, Space 勾选, Enter 开始导出, Q 退出)\n")
+		s.WriteString("📜 历史记录选择 (↑/↓ 移动, " + yellow + "Space" + reset + " 勾选, " + green + "Enter" + reset + " 开始导出, " + reset + red + "Q" + reset + " 退出)\n")
 		s.WriteString("   按 ↓ 键拉到底部将自动从服务器加载更久远的数据...\n\n")
 
 		// 计算分页，防止刷屏
@@ -294,12 +309,15 @@ func (m appModel) View() string {
 }
 
 func main() {
-	fmt.Println("========================================")
-	fmt.Println("       🤖 DeepSeek 导出器 (TUI 版)")
-	fmt.Println("========================================")
+	fmt.Println("================================================================================")
+	fmt.Println("       DeepSeek2md (TUI 版)")
+	fmt.Println("       说明: 导出DeepSeek聊天记录为Markdown文件")
+	fmt.Printf("       作者: %s\n", Author)
+	fmt.Printf("       版本: %s (构建时间: %s, Go 版本: %s)\n", Version, BuildTime, GoVersion)
+	fmt.Println("================================================================================")
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("\n▶ 请输入您的 Web Token (Bearer 后面的部分): ")
+	fmt.Print("\n▶ 请输入您的 Web Token (网页登录后 cookie 的 Bearer 后面的部分)\n: ")
 	token, _ := reader.ReadString('\n')
 	token = strings.TrimSpace(token)
 
