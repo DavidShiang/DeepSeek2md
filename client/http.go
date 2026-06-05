@@ -61,7 +61,7 @@ func (e *Exporter) FetchPage(cursor string) ([]model.ChatSession, string, error)
 		return nil, "", nil // 没有更多数据了
 	}
 
-	// 🌟 核心修复：精准保留 3 位小数，作为下一页的安全游标
+	// 🌟 核心修复：自适应格式转换，不强行补“0”，作为下一页的安全游标
 	lastUpdatedAt := sessions[len(sessions)-1].UpdatedAt
 	nextCursor := strconv.FormatFloat(lastUpdatedAt, 'f', -1, 64)
 

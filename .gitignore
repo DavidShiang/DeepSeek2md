@@ -25,3 +25,5 @@ gitignore
 
 # Go workspace file
 go.work
+
+exports/
