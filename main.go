@@ -194,12 +194,12 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				target = 50
 			}
 
-			// 如果没达到目标且还有数据，继续后台拉取
-			if target > 0 && len(m.sessions) < target && m.hasMore {
+			// 🌟 修复逻辑：如果是全部导出 (target == 0)，或者未达指定数量，只要有数据就继续拉
+			if (target == 0 || len(m.sessions) < target) && m.hasMore {
 				return m, fetchPageCmd(m.exporter, m.apiCursor)
 			}
 
-			// 达到目标，直接进入导出阶段
+			// 达到目标，截断多余数据并进入导出阶段
 			if target > 0 && len(m.sessions) > target {
 				m.sessions = m.sessions[:target]
 			}
@@ -207,7 +207,6 @@ func (m appModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.currentState = stateExport
 			return m, exportCmd(m.exporter, m.exportQueue[0], m.baseDir)
 		}
-
 		m.currentState = stateList
 
 	case exportResultMsg:
