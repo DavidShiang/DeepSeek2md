@@ -63,7 +63,7 @@ func (e *Exporter) FetchPage(cursor string) ([]model.ChatSession, string, error)
 
 	// 🌟 核心修复：精准保留 3 位小数，作为下一页的安全游标
 	lastUpdatedAt := sessions[len(sessions)-1].UpdatedAt
-	nextCursor := strconv.FormatFloat(lastUpdatedAt, 'f', 3, 64)
+	nextCursor := strconv.FormatFloat(lastUpdatedAt, 'f', -1, 64)
 
 	return sessions, nextCursor, nil
 }
