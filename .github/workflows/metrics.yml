@@ -12,12 +12,12 @@ jobs:
       contents: write
     steps:
       - name: Checkout Source Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: main-repo
 
       - name: Checkout Data Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: DavidShiang/davidshiang-metrics-data
           token: ${{ secrets.DEEPSEEK2MD_STATS }}
